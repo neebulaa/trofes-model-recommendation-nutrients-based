@@ -1,0 +1,59 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Trofes MLOps
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  train-and-deploy:
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # 1. Ambil code dari repo GitHub kamu
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Setup Python (Gunakan versi yang sama dengan Space kamu)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip' # Menghindari download ulang library yang sama
+
+      # 3. Install Library yang dibutuhkan
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy scikit-learn huggingface_hub
+
+      # 4. Jalankan Script Training
+      # Pastikan di dalam repo kamu ada file bernama 'training_script.py'
+      - name: Train Models from Notebooks
+        run: python main.py
+
+      # 5. Push Hasil Training (.pkl) ke Hugging Face Model Hub
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -c "
+          from huggingface_hub import HfApi
+          import os
+          api = HfApi()
+          repo_id = 'ArNight/Trofes_Recipe_Recomendation_Model'
+          
+          # Upload dari folder models sesuai struktur kamu
+          api.upload_file(path_or_fileobj='models/nutri_engine_agglo.pkl', path_in_repo='nutri_engine_agglo.pkl', repo_id=repo_id, token=os.getenv('HF_TOKEN'))
+          api.upload_file(path_or_fileobj='models/recipe_engine_kmeans.pkl', path_in_repo='recipe_engine_kmeans.pkl', repo_id=repo_id, token=os.getenv('HF_TOKEN'))
+          "
