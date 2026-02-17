@@ -17,6 +17,7 @@ joblib
 nbformat
 nbconvert
 ipykernel
+ipython
 
 # Integrasi Hugging Face
 huggingface_hub
