@@ -52,8 +52,16 @@ jobs:
           import os
           api = HfApi()
           repo_id = 'ArNight/Trofes_Recipe_Recomendation_Model'
+
+          version = '2.1'
+          commit_msg = f'Update model version {version}'
           
           # Upload dari folder models sesuai struktur kamu
-          api.upload_file(path_or_fileobj='models/nutri_engine_agglo.pkl', path_in_repo='nutri_engine_agglo.pkl', repo_id=repo_id, token=os.getenv('HF_TOKEN'))
-          api.upload_file(path_or_fileobj='models/recipe_engine_kmeans.pkl', path_in_repo='recipe_engine_kmeans.pkl', repo_id=repo_id, token=os.getenv('HF_TOKEN'))
+          api.upload_file(path_or_fileobj='models/nutri_engine_agglo.pkl', path_in_repo='nutri_engine_agglo.pkl', repo_id=repo_id, token=os.getenv('HF_TOKEN'), commit_message=commit_msg)
+          api.upload_file(path_or_fileobj='models/recipe_engine_kmeans.pkl', path_in_repo='recipe_engine_kmeans.pkl', repo_id=repo_id, token=os.getenv('HF_TOKEN'), commit_message=commit_msg)
           "
+      
+      # 6. Deploy ke Hugging Face Space
+      - name: Reload Space
+        run: |
+          curl -X POST https://huggingface.co/api/spaces/ArNight/trofes-api/restart -H "Authorization: Bearer ${{ secrets.HF_TOKEN }}"
